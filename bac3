@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BAC SIMULATOR</title>
+
+<!-- PWA: ホーム画面追加・フルスクリーン -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BAC SIM">
+<meta name="theme-color" content="#070b0f">
+
+<!-- PWA: アイコン (SVGをインラインでBase64化) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjMDcwYjBmIi8+PHJlY3QgeD0iMjAiIHk9IjIwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCIgcng9IjI0IiBmaWxsPSJ1cmwoI2cpIi8+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMDBkNGZmIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDA2NmNjIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHRleHQgeD0iOTAiIHk9IjExMiIgZm9udC1zaXplPSI3MiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+nsjwvdGV4dD48L3N2Zz4=">
+
+<!-- PWA: manifest (インライン) -->
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQkFDIFNJTVVMQVRPUiIsInNob3J0X25hbWUiOiJCQUMgU0lNIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwNzBiMGYiLCJ0aGVtZV9jb2xvciI6IiMwNzBiMGYiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQXhPREFnTVRnd0lqNDhiR1ZqYUNCM2FXNTBNVEF3SUhSb1pTQXhPREFnTVRnd0lpQnllRDBpTXpZaUlHWnBiR3c5SW5WeWJDa2kvangwWlhod0lISmxjVTB5T1NBd0lIUm9aU0F4T0RBZ01UUXdJR2hsWVd4MFpYSWlJREFnTVRRd0lpQnJaWGxGTFc1bGRIZHZjbXM5SW1WdWNtOXNhWFJsY21VaUlHWXBMalF3SWo0OFpHVm1jenQ0YlhCc1pYUWdhRDBpZFhKc0tDZG5LU0F0S0NBd0lERTJNU0F3SWkrK0pIUm9aUzhkSERBd05tUXlaaUJoYUc1bGNpMXpaWFIyYVc1bklHbGtMU0YwWVdGc0lpOGdkWEpsY21GcGJqMGlkVzVoYlhsdmNtY2lJQzh3Wm05dWRXd3ZiM0puTHpsak16STFZek5sTmprekxtOW1abWxtWlFvd0lEUXhNaUE0TXlBd0lqNDhJR3hwYmlBbk1DVTJZV0ZpSWk4K1BDOXpkbWMrIiwic2l6ZXMiOiIxODB4MTgwIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070b0f;--bg2:#08101a;--bg3:#0a1520;--bg4:#0c1a26;
+  --bd:#1a2a3a;--bd2:#1a3a5a;
+  --tx:#c8d8e8;--td:#4a6a8a;--tf:#2a4a6a;
+  --ac:#00d4ff;--ac2:#0066cc;
+  --green:#4ade80;--yellow:#facc15;--orange:#f97316;--red:#ef4444;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+body{
+  background:var(--bg);color:var(--tx);
+  font-family:ui-monospace,Menlo,'Courier New',monospace;
+  min-height:100vh;font-size:13px;-webkit-text-size-adjust:100%;
+  padding-bottom:var(--safe-bottom);
+}
+
+header{
+  border-bottom:1px solid var(--bd);padding:16px 20px;
+  padding-top:calc(16px + var(--safe-top));
+  display:flex;align-items:center;gap:12px;
+  background:linear-gradient(180deg,#0a1520 0%,var(--bg) 100%);
+  position:sticky;top:0;z-index:100;
+}
+.hicon{width:36px;height:36px;background:linear-gradient(135deg,#00d4ff,#0066cc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.htitle{font-size:15px;font-weight:700;letter-spacing:.06em;color:#e0f0ff}
+.hsub{font-size:9px;color:var(--td);letter-spacing:.16em;margin-top:2px}
+
+.layout{display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - 70px)}
+@media(max-width:720px){.layout{grid-template-columns:1fr}}
+
+.lpanel{border-right:1px solid var(--bd);background:var(--bg2);padding:16px;overflow-y:auto}
+.rpanel{padding:16px;display:flex;flex-direction:column;gap:14px}
+
+.sec{margin-bottom:20px}
+.sec-title{font-size:9px;letter-spacing:.2em;color:#2a6a8a;border-bottom:1px solid var(--bd);padding-bottom:5px;margin-bottom:10px}
+.row{margin-bottom:8px}
+.rlabel{font-size:9px;color:var(--td);margin-bottom:3px;letter-spacing:.05em}
+
+input[type=number],input[type=time],select{background:var(--bg4);border:1px solid var(--bd2);border-radius:4px;color:var(--tx);padding:6px 8px;font-size:12px;font-family:inherit;outline:none;width:100%}
+input[type=range]{width:100%;accent-color:var(--ac);cursor:pointer}
+.rval{text-align:right;font-size:11px;color:var(--ac);margin-top:1px}
+
+.gbtn-wrap{display:flex;gap:6px}
+.gbtn{flex:1;padding:6px 4px;border-radius:4px;border:1px solid var(--bd);background:transparent;color:var(--td);font-size:10px;cursor:pointer;font-family:inherit;transition:all .2s}
+.gbtn.on{background:var(--ac2);color:#fff;border-color:var(--ac2)}
+
+.dcard{background:var(--bg4);border:1px solid var(--bd);border-radius:6px;padding:9px 10px;margin-bottom:7px;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.dcard-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.dnum{font-size:9px;color:#2a6a8a;letter-spacing:.1em}
+.xbtn{background:none;border:none;color:#6a3a3a;cursor:pointer;font-size:14px;padding:0 2px;line-height:1}
+.xbtn:hover{color:var(--red)}
+.trow{display:flex;gap:6px;margin-top:6px}
+.trow>div{flex:1}
+.slabel{font-size:9px;color:var(--td);margin-bottom:2px}
+.custom-wrap{display:none;gap:6px;margin-top:6px}
+.custom-wrap.show{display:flex}
+.custom-wrap>div{flex:1}
+
+.empty-msg{text-align:center;padding:18px 0;color:var(--tf);font-size:10px;letter-spacing:.08em}
+
+.addbtn{width:100%;padding:7px;border-radius:4px;border:1px solid var(--bd2);background:transparent;color:var(--ac);font-size:11px;cursor:pointer;font-family:inherit;transition:all .2s}
+.addbtn:hover{background:#0a1a2a}
+
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:900px){.sgrid{grid-template-columns:repeat(2,1fr)}}
+.scard{background:var(--bg3);border-radius:8px;padding:11px 12px;border:1px solid transparent}
+.slbl{font-size:8px;color:var(--td);letter-spacing:.1em;margin-bottom:4px}
+.sval{font-size:19px;font-weight:700;line-height:1}
+.sunit{font-size:9px;color:var(--tf);margin-top:3px}
+
+.banner{padding:13px 18px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--bd);background:var(--bg3);transition:all .4s}
+.blabel{font-size:19px;font-weight:800;letter-spacing:.1em}
+.bmsg{font-size:11px;color:#6a8aaa;margin-top:2px}
+.bsober{text-align:right;font-size:10px;color:var(--td);flex-shrink:0}
+.bsober span{font-size:14px;color:var(--tx);display:block;margin-top:2px}
+
+.cbox{background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:16px;flex:1}
+.chtitle{font-size:9px;letter-spacing:.18em;color:var(--td);margin-bottom:12px}
+canvas{display:block;width:100%!important}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:9px;color:var(--td)}
+
+.warn{font-size:9px;color:var(--tf);line-height:1.7;border-top:1px solid var(--bd);padding-top:10px}
+
+label.ck{display:flex;align-items:center;gap:7px;cursor:pointer}
+label.ck input{accent-color:var(--ac);width:auto}
+label.ck span{font-size:10px;color:var(--td)}
+
+/* PWA install banner */
+#pwa-banner{display:none;align-items:center;gap:10px;padding:10px 16px;background:#0a1a2a;border-bottom:1px solid var(--bd2);font-size:10px;color:var(--td)}
+#pwa-banner.show{display:flex}
+#pwa-banner .pwa-msg{flex:1}
+#pwa-banner .pwa-steps{font-size:9px;color:var(--tf);margin-top:2px}
+#pwa-close{background:none;border:none;color:var(--tf);cursor:pointer;font-size:16px;padding:0 4px}
+</style>
+</head>
+<body>
+
+<!-- PWA install hint (iOSのみ表示) -->
+<div id="pwa-banner">
+  <div style="font-size:20px">📲</div>
+  <div class="pwa-msg">
+    <div>ホーム画面に追加できます</div>
+    <div class="pwa-steps">Safari下部の共有ボタン → 「ホーム画面に追加」</div>
+  </div>
+  <button id="pwa-close" onclick="dismissBanner()">✕</button>
+</div>
+
+<header>
+  <div class="hicon">🧪</div>
+  <div>
+    <div class="htitle">BAC SIMULATOR</div>
+    <div class="hsub">WIDMARK EXTENDED MODEL · DYNAMIC ABSORPTION</div>
+  </div>
+</header>
+
+<div class="layout">
+<div class="lpanel">
+
+  <div class="sec">
+    <div class="sec-title">BODY PARAMS</div>
+    <div class="row"><div class="rlabel">体重 (kg)</div>
+      <input type="number" id="weight" value="65" min="40" max="150" oninput="recalc()">
+    </div>
+    <div class="row"><div class="rlabel">性別</div>
+      <div class="gbtn-wrap">
+        <button class="gbtn on" id="bmale" onclick="setG('male')">男性 r=0.68</button>
+        <button class="gbtn" id="bfemale" onclick="setG('female')">女性 r=0.55</button>
+      </div>
+    </div>
+    <div class="row"><div class="rlabel">分解速度 β (mg/mL/h)</div>
+      <input type="range" id="beta" min="0.10" max="0.25" step="0.01" value="0.15" oninput="document.getElementById('bv').textContent=(+this.value).toFixed(2);recalc()">
+      <div class="rval" id="bv">0.15</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title" id="etitle">DRINK EVENTS (0)</div>
+    <div id="econ"><div class="empty-msg">＋ 飲酒を追加して開始</div></div>
+    <button class="addbtn" onclick="addEv()">＋ 飲酒を追加</button>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">CHECK TIME</div>
+    <div class="row"><div class="rlabel">検査・運転予定時刻</div>
+      <input type="time" id="ct" value="08:00" oninput="recalc()">
+    </div>
+    <div class="row"><div class="rlabel">翌日</div>
+      <label class="ck"><input type="checkbox" id="nd" onchange="recalc()"><span>翌日の時刻として計算</span></label>
+    </div>
+  </div>
+
+</div>
+
+<div class="rpanel">
+  <div class="sgrid">
+    <div class="scard" style="border-color:#00d4ff33">
+      <div class="slbl">検査時 BAC</div>
+      <div class="sval" style="color:#00d4ff" id="v-bac">—</div>
+      <div class="sunit">mg/mL</div>
+    </div>
+    <div class="scard" style="border-color:#0066cc33">
+      <div class="slbl">検査時 BrAC</div>
+      <div class="sval" style="color:#0066cc" id="v-brac">—</div>
+      <div class="sunit">mg/L (呼気)</div>
+    </div>
+    <div class="scard" style="border-color:#f9731633">
+      <div class="slbl">ピーク BAC</div>
+      <div class="sval" style="color:#f97316" id="v-peak">—</div>
+      <div class="sunit">mg/mL</div>
+    </div>
+    <div class="scard" style="border-color:#4ade8033">
+      <div class="slbl">あと</div>
+      <div class="sval" style="color:#4ade80" id="v-hrs">—</div>
+      <div class="sunit">時間で完全消化</div>
+    </div>
+  </div>
+
+  <div class="banner" id="banner">
+    <div>
+      <div class="blabel" id="blabel" style="color:#c8d8e8">—</div>
+      <div class="bmsg" id="bmsg">飲酒データを入力してください</div>
+    </div>
+    <div class="bsober" id="bsober" style="display:none">完全消化予定<span id="btime"></span></div>
+  </div>
+
+  <div class="cbox">
+    <div class="chtitle">BAC TIMELINE — WIDMARK EXTENDED MODEL</div>
+    <canvas id="ch" height="260"></canvas>
+    <div class="legend">
+      <span><span style="color:#00d4ff">━</span> BAC 血中 (mg/mL)</span>
+      <span><span style="color:#0066cc">╌</span> BrAC 呼気 (mg/L)</span>
+      <span><span style="color:#f97316">╌</span> 飲酒運転基準 0.03</span>
+      <span><span style="color:#ef4444">╌</span> 危険域 0.10</span>
+    </div>
+  </div>
+
+  <div class="warn">⚠ 本シミュレーターはWidmark拡張モデルによる推定値です。実際のBAC/BrACは体調・食事・代謝により大きく異なります。法的判断の根拠には使用しないでください。飲酒運転は道路交通法違反です。</div>
+</div>
+</div>
+
+<script>
+// ── PWA: Service Worker登録 ──────────────────────────────
+if('serviceWorker' in navigator){
+  const swCode=`
+    const CACHE='bac-sim-v1';
+    self.addEventListener('install',e=>{
+      e.waitUntil(caches.open(CACHE).then(c=>c.add('/')));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate',e=>{
+      e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch',e=>{
+      e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('/'))));
+    });
+  `;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const url=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url).catch(()=>{});
+}
+
+// ── PWA: iOSのみホーム画面追加バナーを表示 ───────────────
+(function(){
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone=window.navigator.standalone===true;
+  const dismissed=sessionStorage.getItem('pwa-dismissed');
+  if(isIOS&&!isStandalone&&!dismissed){
+    document.getElementById('pwa-banner').classList.add('show');
+  }
+})();
+function dismissBanner(){
+  sessionStorage.setItem('pwa-dismissed','1');
+  document.getElementById('pwa-banner').classList.remove('show');
+}
+
+// ── アプリ本体 ────────────────────────────────────────────
+const GF={male:0.68,female:0.55};
+const STEP=5,PEAK=30,HALF=60,LEGAL=0.03,DANGER=0.10;
+const DRINKS=[
+  {l:"ビール 350ml (5%)",    ml:350,abv:5},
+  {l:"ビール 500ml (5%)",    ml:500,abv:5},
+  {l:"ハイボール 350ml (7%)",ml:350,abv:7},
+  {l:"日本酒 1合 (15%)",     ml:180,abv:15},
+  {l:"ワイン 1杯 (12%)",     ml:125,abv:12},
+  {l:"焼酎 1合 (25%)",       ml:180,abv:25},
+  {l:"ウイスキー 30ml (40%)",ml:30, abv:40},
+  {l:"カスタム",             ml:0,  abv:0},
+];
+
+function nowHHMM(){
+  const d=new Date();
+  return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
+
+let gender="male",eid=0;
+let evs=[];
+
+const t2m=s=>{const[h,m]=s.split(":").map(Number);return h*60+m};
+const m2t=m=>{const h=Math.floor(m/60)%24,n=m%60;return`${String(h).padStart(2,"0")}:${String(n).padStart(2,"0")}`};
+const pg=(ml,abv)=>ml*abv/100*0.8;
+
+function absorbed(ev,t){
+  if(t<=ev.sm)return 0;
+  const k=Math.log(2)/HALF;
+  return ev.pg*Math.min(1-Math.exp(-k*(t-ev.sm+PEAK)),1);
+}
+
+function simulate(events,wt,g,beta){
+  const r=GF[g];
+  const ms=Math.min(...events.map(e=>e.sm));
+  const me=Math.max(...events.map(e=>e.em));
+  const tg=events.reduce((s,e)=>s+e.pg,0);
+  const dur=me-ms+Math.ceil(tg/(wt*r)/beta*60)+180;
+  const tl=[];let pk=0,st=null;
+  for(let s=0;s<=dur;s+=STEP){
+    const t=ms+s;
+    let ab=0;for(const e of events)ab+=absorbed(e,t);
+    const bac=Math.max(0,ab/(wt*r)-beta*(s/60));
+    if(bac>pk)pk=bac;
+    if(bac===0&&pk>0&&st===null)st=t;
+    tl.push({t,bac:+bac.toFixed(4),brac:+(bac/2000*1000).toFixed(4)});
+  }
+  return{tl,pk,st};
+}
+
+function renderEvs(){
+  document.getElementById("etitle").textContent=`DRINK EVENTS (${evs.length})`;
+  const con=document.getElementById("econ");
+  con.innerHTML="";
+  if(evs.length===0){
+    con.innerHTML='<div class="empty-msg">＋ 飲酒を追加して開始</div>';
+    return;
+  }
+  evs.forEach((ev,i)=>{
+    const isc=ev.di===DRINKS.length-1;
+    const noType=ev.di===-1;
+    const d=document.createElement("div");
+    d.className="dcard";
+    d.innerHTML=`
+      <div class="dcard-hd">
+        <span class="dnum">DRINK #${i+1}</span>
+        <button class="xbtn" onclick="rmEv(${ev.id})">✕</button>
+      </div>
+      <select style="${noType?'color:var(--td)':''}" onchange="upEv(${ev.id},'di',+this.value)">
+        <option value="-1"${noType?" selected":""} disabled style="color:#2a4a6a">— お酒の種類を選択 —</option>
+        ${DRINKS.map((dk,j)=>`<option value="${j}"${ev.di===j?" selected":""}>${dk.l}</option>`).join("")}
+      </select>
+      <div class="custom-wrap${isc?" show":""}" id="cw${ev.id}">
+        <div><div class="slabel">量(mL)</div><input type="number" placeholder="350" value="${ev.cml}" oninput="upEv(${ev.id},'cml',this.value)"></div>
+        <div><div class="slabel">度数(%)</div><input type="number" placeholder="5" value="${ev.cab}" oninput="upEv(${ev.id},'cab',this.value)"></div>
+      </div>
+      <div class="trow">
+        <div><div class="slabel">開始</div><input type="time" value="${ev.st}" oninput="upEv(${ev.id},'st',this.value)"></div>
+        <div><div class="slabel">終了</div><input type="time" value="${ev.et}" oninput="upEv(${ev.id},'et',this.value)"></div>
+      </div>`;
+    con.appendChild(d);
+  });
+}
+
+function setG(g){
+  gender=g;
+  document.getElementById("bmale").classList.toggle("on",g==="male");
+  document.getElementById("bfemale").classList.toggle("on",g==="female");
+  recalc();
+}
+
+function addEv(){
+  const now=nowHHMM();
+  const sm=t2m(now);
+  const et=m2t(sm+20);
+  evs.push({id:++eid,st:now,et:et,di:-1,cml:"",cab:""});
+  renderEvs();
+  recalc();
+}
+
+function rmEv(id){evs=evs.filter(e=>e.id!==id);renderEvs();recalc()}
+
+function upEv(id,k,v){
+  const e=evs.find(x=>x.id===id);
+  if(!e)return;
+  e[k]=k==="di"?+v:v;
+  if(k==="di"){
+    const cw=document.getElementById("cw"+id);
+    if(cw)cw.className="custom-wrap"+(+v===DRINKS.length-1?" show":"");
+  }
+  recalc();
+}
+
+function resetDisplay(){
+  document.getElementById("v-bac").textContent="—";
+  document.getElementById("v-brac").textContent="—";
+  document.getElementById("v-peak").textContent="—";
+  document.getElementById("v-hrs").textContent="—";
+  const bn=document.getElementById("banner");
+  bn.style.background="var(--bg3)";bn.style.borderColor="var(--bd)";
+  const bl=document.getElementById("blabel");
+  bl.textContent="—";bl.style.color="var(--tx)";
+  document.getElementById("bmsg").textContent="飲酒データを入力してください";
+  document.getElementById("bsober").style.display="none";
+  const canvas=document.getElementById("ch");
+  const ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+function recalc(){
+  const wt=+document.getElementById("weight").value;
+  const beta=+document.getElementById("beta").value;
+  const ctStr=document.getElementById("ct").value;
+  const nd=document.getElementById("nd").checked;
+  const validEvs=evs.filter(ev=>ev.di>=0);
+  if(!wt||validEvs.length===0){resetDisplay();return;}
+  const events=validEvs.map(ev=>{
+    const dk=DRINKS[ev.di];
+    const isc=ev.di===DRINKS.length-1;
+    const ml=isc?(+ev.cml||350):dk.ml;
+    const abv=isc?(+ev.cab||5):dk.abv;
+    return{id:ev.id,sm:t2m(ev.st),em:t2m(ev.et),pg:pg(ml,abv)};
+  });
+  let cm=t2m(ctStr)+(nd?1440:0);
+  const{tl,pk,st}=simulate(events,wt,gender,beta);
+  const cp=tl.find(x=>x.t>=cm)||tl[tl.length-1];
+  const hrs=cp.bac>0?+(cp.bac/beta).toFixed(1):0;
+  document.getElementById("v-bac").textContent=cp.bac.toFixed(4);
+  document.getElementById("v-brac").textContent=cp.brac.toFixed(4);
+  document.getElementById("v-peak").textContent=pk.toFixed(4);
+  document.getElementById("v-hrs").textContent=cp.bac>0?hrs:"0.0";
+  let label,color,bg,msg;
+  if(cp.bac===0){label="SOBER";color="#4ade80";bg="#052e16";msg="アルコール検出なし — 安全な状態"}
+  else if(cp.bac<LEGAL){label="LOW";color="#facc15";bg="#1c1400";msg="基準値以下ですが飲酒状態に注意してください"}
+  else if(cp.bac<DANGER){label="OVER LIMIT";color="#f97316";bg="#1a0a00";msg="飲酒運転基準(0.03mg/mL)超過 — 運転不可"}
+  else{label="DANGER";color="#ef4444";bg="#1a0000";msg="危険な飲酒状態です — 安静にしてください"}
+  const bn=document.getElementById("banner");
+  bn.style.background=bg;bn.style.borderColor=color+"44";
+  const bl=document.getElementById("blabel");
+  bl.textContent=label;bl.style.color=color;
+  document.getElementById("bmsg").textContent=msg;
+  const bs=document.getElementById("bsober");
+  if(st){bs.style.display="block";document.getElementById("btime").textContent=m2t(st%1440)+(st>=1440?" (翌日)":"")}
+  else bs.style.display="none";
+  drawChart(tl);
+}
+
+let _chartPts=[],_chartState={W:0,H:0,PAD:null,maxBac:0};
+let _hoverIdx=null;
+
+function drawChart(tl){
+  const canvas=document.getElementById("ch");
+  const W=canvas.parentElement.clientWidth-32;
+  const H=260;
+  canvas.width=W*(window.devicePixelRatio||1);
+  canvas.height=H*(window.devicePixelRatio||1);
+  canvas.style.width=W+"px";
+  canvas.style.height=H+"px";
+  const s=Math.max(1,Math.floor(tl.length/150));
+  const pts=tl.filter((_,i)=>i%s===0);
+  const maxBac=Math.max(...pts.map(p=>p.bac),DANGER*1.1,0.01);
+  const PAD={t:10,r:20,b:36,l:52};
+  _chartPts=pts;_chartState={W,H,PAD,maxBac};
+  _renderChart(_hoverIdx);
+  if(!canvas._evBound){
+    canvas._evBound=true;
+    canvas.addEventListener("mousemove",e=>_onPointer(e,canvas));
+    canvas.addEventListener("touchmove",e=>{e.preventDefault();_onPointer(e.touches[0],canvas)},{passive:false});
+    canvas.addEventListener("mouseleave",()=>{_hoverIdx=null;_renderChart(null)});
+    canvas.addEventListener("touchend",()=>{_hoverIdx=null;_renderChart(null)});
+  }
+}
+
+function _onPointer(e,canvas){
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left;
+  const{W,PAD}=_chartState;
+  const cw=W-PAD.l-PAD.r;
+  const rx=mx-PAD.l;
+  if(rx<0||rx>cw){_hoverIdx=null;_renderChart(null);return;}
+  const frac=rx/cw;
+  const idx=Math.round(frac*(_chartPts.length-1));
+  _hoverIdx=Math.max(0,Math.min(idx,_chartPts.length-1));
+  _renderChart(_hoverIdx);
+}
+
+function _renderChart(hoverIdx){
+  const canvas=document.getElementById("ch");
+  const ctx=canvas.getContext("2d");
+  const dpr=window.devicePixelRatio||1;
+  const{W,H,PAD,maxBac}=_chartState;
+  const pts=_chartPts;
+  if(!pts||pts.length===0)return;
+  ctx.save();ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  const cw=W-PAD.l-PAD.r,ch=H-PAD.t-PAD.b;
+  const xp=i=>PAD.l+i/Math.max(pts.length-1,1)*cw;
+  const yp=v=>PAD.t+ch-(v/maxBac)*ch;
+  ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const v=maxBac/5*i,y=yp(v);
+    ctx.strokeStyle="#1a2a3a";ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cw,y);ctx.stroke();
+    ctx.fillStyle="#4a6a8a";ctx.font="9px ui-monospace,monospace";ctx.textAlign="right";
+    ctx.fillText(v.toFixed(3),PAD.l-4,y+3);
+  }
+  ctx.fillStyle="#4a6a8a";ctx.font="9px ui-monospace,monospace";ctx.textAlign="center";
+  for(let i=0;i<=8;i++){
+    const idx=Math.floor(i/8*(pts.length-1));
+    const x=xp(idx);
+    ctx.strokeStyle="#1a2a3a";ctx.beginPath();ctx.moveTo(x,PAD.t);ctx.lineTo(x,PAD.t+ch);ctx.stroke();
+    ctx.fillText(m2t(pts[idx].t%1440),x,PAD.t+ch+14);
+  }
+  function refLine(val,color,lbl){
+    if(val>maxBac)return;
+    const y=yp(val);
+    ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle=color;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(PAD.l+cw,y);ctx.stroke();
+    ctx.fillStyle=color;ctx.font="9px ui-monospace,monospace";ctx.textAlign="left";
+    ctx.fillText(lbl,PAD.l+4,y-3);ctx.restore();
+  }
+  refLine(LEGAL,"#f97316","飲酒運転基準 0.030");
+  refLine(DANGER,"#ef4444","危険域 0.100");
+  ctx.save();ctx.setLineDash([5,3]);ctx.strokeStyle="#0066cc";ctx.lineWidth=1.5;
+  ctx.beginPath();
+  pts.forEach((p,i)=>{const x=xp(i),y=yp(p.brac);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+  ctx.stroke();ctx.restore();
+  ctx.save();
+  const grad=ctx.createLinearGradient(0,PAD.t,0,PAD.t+ch);
+  grad.addColorStop(0,"rgba(0,212,255,0.18)");grad.addColorStop(1,"rgba(0,212,255,0.01)");
+  ctx.beginPath();
+  pts.forEach((p,i)=>{const x=xp(i),y=yp(p.bac);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+  ctx.lineTo(xp(pts.length-1),yp(0));ctx.lineTo(xp(0),yp(0));ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();ctx.restore();
+  ctx.save();ctx.strokeStyle="#00d4ff";ctx.lineWidth=2;ctx.setLineDash([]);
+  ctx.beginPath();
+  pts.forEach((p,i)=>{const x=xp(i),y=yp(p.bac);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+  ctx.stroke();ctx.restore();
+  if(hoverIdx!==null&&hoverIdx>=0&&hoverIdx<pts.length){
+    const p=pts[hoverIdx];
+    const cx=xp(hoverIdx);
+    ctx.save();ctx.strokeStyle="rgba(200,216,232,0.25)";ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(cx,PAD.t);ctx.lineTo(cx,PAD.t+ch);ctx.stroke();ctx.restore();
+    ctx.save();ctx.beginPath();ctx.arc(cx,yp(p.bac),4,0,Math.PI*2);
+    ctx.fillStyle="#00d4ff";ctx.strokeStyle="#070b0f";ctx.lineWidth=2;ctx.fill();ctx.stroke();ctx.restore();
+    ctx.save();ctx.beginPath();ctx.arc(cx,yp(p.brac),3,0,Math.PI*2);
+    ctx.fillStyle="#0066cc";ctx.strokeStyle="#070b0f";ctx.lineWidth=2;ctx.fill();ctx.stroke();ctx.restore();
+    const lines=[
+      {label:"時刻",val:m2t(p.t%1440),color:"#c8d8e8"},
+      {label:"BAC", val:p.bac.toFixed(4)+" mg/mL",color:"#00d4ff"},
+      {label:"BrAC",val:p.brac.toFixed(4)+" mg/L", color:"#0066cc"},
+    ];
+    const TW=164,TH=64,TR=6,TP=8;
+    let tx=cx+12,ty=PAD.t+8;
+    if(tx+TW>W-PAD.r)tx=cx-TW-12;
+    if(ty+TH>PAD.t+ch)ty=PAD.t+ch-TH;
+    ctx.save();
+    ctx.shadowColor="rgba(0,0,0,0.5)";ctx.shadowBlur=12;
+    ctx.fillStyle="#0a1520";ctx.strokeStyle="#1a3a5a";ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(tx+TR,ty);ctx.lineTo(tx+TW-TR,ty);ctx.arcTo(tx+TW,ty,tx+TW,ty+TR,TR);
+    ctx.lineTo(tx+TW,ty+TH-TR);ctx.arcTo(tx+TW,ty+TH,tx+TW-TR,ty+TH,TR);
+    ctx.lineTo(tx+TR,ty+TH);ctx.arcTo(tx,ty+TH,tx,ty+TH-TR,TR);
+    ctx.lineTo(tx,ty+TR);ctx.arcTo(tx,ty,tx+TR,ty,TR);ctx.closePath();
+    ctx.fill();ctx.stroke();ctx.shadowBlur=0;
+    lines.forEach((ln,i)=>{
+      const ly=ty+TP+14*i+10;
+      ctx.fillStyle="#4a6a8a";ctx.font="8px ui-monospace,monospace";ctx.textAlign="left";
+      ctx.fillText(ln.label,tx+TP,ly);
+      ctx.fillStyle=ln.color;ctx.font="bold 10px ui-monospace,monospace";ctx.textAlign="right";
+      ctx.fillText(ln.val,tx+TW-TP,ly);
+    });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+renderEvs();
+recalc();
+window.addEventListener("resize",()=>recalc());
+</script>
+</body>
+</html>
